@@ -7,16 +7,14 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Segoe UI','PingFang SC',sans-serif;background:#f0f6fb;min-height:100vh;display:flex;overflow:hidden}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Segoe UI','PingFang SC',sans-serif;background:#f0f6fb;min-height:100vh;display:flex;overflow:hidden;user-select:none;-webkit-user-select:none}
 
 /* ==================== 侧边栏与折叠 ==================== */
 .sidebar{width:230px;background:#fff;border-right:1px solid #e6edf4;padding:24px 20px;height:100vh;position:relative;display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0;box-shadow:2px 0 16px rgba(0,0,0,.03);transition:width .3s ease, padding .3s ease, opacity .3s ease}
 .sidebar.collapsed{width:0!important;padding:0!important;overflow:hidden;border-right:none;opacity:0}
-
 .sidebar-header{margin-bottom:24px;white-space:nowrap}
 .sidebar-header h2{font-size:18px;font-weight:700;color:#1a2a3a;line-height:1.4;word-break:break-all;white-space:normal;}
-
 .sidebar .course-selector{margin-bottom:28px}
 .sidebar .course-selector .title{display:block;font-weight:600;color:#2c3e50;margin-bottom:8px;font-size:14px;white-space:nowrap}
 .multi-select{position:relative;width:100%}
@@ -52,7 +50,6 @@ body{font-family:'Segoe UI','PingFang SC',sans-serif;background:#f0f6fb;min-heig
 
 /* ==================== 主体内容 ==================== */
 .main{flex:1;padding:24px 40px;overflow-y:auto;height:100vh;background:#f0f6fb;transition:padding .3s}
-
 .main-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;gap:16px}
 .main-header-left{display:flex;align-items:center;gap:16px}
 .main-header h1{font-size:28px;font-weight:700;color:#1a2a3a;margin:0}
@@ -91,6 +88,45 @@ body{font-family:'Segoe UI','PingFang SC',sans-serif;background:#f0f6fb;min-heig
 .word-card .pinyin{font-size:14px;color:#5a6c7d;margin-top:2px}
 .word-card .trans{font-size:13px;color:#6a7b8c;margin-top:2px}
 
+/* ==================== 单字双人对决 ==================== */
+.duel-wrapper{background:linear-gradient(135deg,#f8fafc 0%,#eef4fc 100%);border-radius:28px;padding:24px;box-shadow:inset 0 0 40px rgba(59,124,255,.04)}
+.duel-header{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-bottom:20px;align-items:center}
+.duel-container{display:grid;grid-template-columns:1fr 1fr;gap:20px;position:relative}
+.duel-container::before{content:'';position:absolute;left:50%;top:0;bottom:0;width:2px;background:linear-gradient(180deg,transparent,#dce4ec 20%,#dce4ec 80%,transparent);transform:translateX(-50%);pointer-events:none;z-index:0}
+.duel-player{background:#fff;border-radius:24px;padding:18px;border:3px solid #e6edf4;box-shadow:0 8px 24px rgba(0,0,0,.06);transition:all .35s ease;position:relative;z-index:1;overflow:hidden;display:flex;flex-direction:column;min-height:520px}
+.duel-player::before{content:'';position:absolute;top:0;left:0;right:0;height:6px;transition:all .3s ease}
+.duel-player#duelPlayer1{border-color:#fca5a5;background:linear-gradient(180deg,#fff5f5 0%,#ffffff 30%)}
+.duel-player#duelPlayer1::before{background:linear-gradient(90deg,#ef4444,#f87171,#ef4444)}
+.duel-player#duelPlayer2{border-color:#93c5fd;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 30%)}
+.duel-player#duelPlayer2::before{background:linear-gradient(90deg,#3b82f6,#60a5fa,#3b82f6)}
+
+.duel-player-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:12px;border-bottom:2px dashed #e6edf4}
+.duel-player-name{font-weight:800;font-size:18px;letter-spacing:.5px}
+.duel-timer{font-size:24px;font-weight:800;font-family:'Courier New',monospace;background:linear-gradient(135deg,#0b6e4f,#0a5a40);color:#fff;padding:4px 14px;border-radius:12px;letter-spacing:2px;box-shadow:0 4px 12px rgba(11,110,79,.3);min-width:90px;text-align:center}
+
+/* 线索（目标词翻译） */
+.duel-clues{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;min-height:60px;background:rgba(255,255,255,0.6);padding:10px;border-radius:12px;border:1px dashed #cbd5e1}
+.clue-card{background:#fff;padding:6px 10px;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,.04);font-size:13px;font-weight:600;color:#334155;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:80px}
+.clue-card .trans{color:#64748b;font-weight:500;font-size:11px;margin-top:2px;text-align:center}
+
+.duel-grid{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;align-content:flex-start;flex:1}
+.duel-char-card{width:60px;height:60px;border-radius:14px;border:2px solid #e6edf4;background:#fff;cursor:pointer;font-size:26px;font-weight:700;color:#1a2a3a;display:flex;align-items:center;justify-content:center;transition:all .2s cubic-bezier(.34,1.56,.64,1);touch-action:manipulation;position:relative;box-shadow:0 2px 6px rgba(0,0,0,.04)}
+#duelPlayer1 .duel-char-card{border-color:#fecaca}
+#duelPlayer1 .duel-char-card:hover{border-color:#ef4444;transform:translateY(-2px)}
+#duelPlayer2 .duel-char-card{border-color:#bfdbfe}
+#duelPlayer2 .duel-char-card:hover{border-color:#3b82f6;transform:translateY(-2px)}
+
+.duel-char-card.active{border-color:#3b7cff;background:#e0edff;box-shadow:0 0 0 4px rgba(59,124,255,.2);transform:translateY(-2px) scale(1.05)}
+#duelPlayer1 .duel-char-card.active{border-color:#ef4444;background:#fee2e2;box-shadow:0 0 0 4px rgba(239,68,68,.2)}
+#duelPlayer2 .duel-char-card.active{border-color:#3b82f6;background:#dbeafe;box-shadow:0 0 0 4px rgba(59,130,246,.2)}
+
+.duel-char-card.matched{opacity:0;transform:scale(.5);pointer-events:none;visibility:hidden;transition:all .4s}
+.duel-char-card.wrong{border-color:#ef4444;color:#991b1b;animation:duelShake .45s}
+@keyframes duelShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
+
+.duel-result-msg{text-align:center;font-size:24px;font-weight:800;margin-top:20px;min-height:36px;padding:0 16px}
+.win1{color:#dc2626}.win2{color:#3b7cff}.waiting{color:#5a6c7d;font-size:18px}
+
 /* ==================== 词汇配对（单人） ==================== */
 .pair-area{display:flex;justify-content:space-between;align-items:flex-start;gap:40px;padding:20px 0;flex-wrap:wrap}
 .pair-col{flex:1;min-width:160px}
@@ -101,59 +137,24 @@ body{font-family:'Segoe UI','PingFang SC',sans-serif;background:#f0f6fb;min-heig
 .pair-status{text-align:center;margin:12px 0;font-size:15px;color:#0b6e4f}
 .pair-batch-info{text-align:center;font-size:15px;color:#5a6c7d;margin-bottom:12px}
 
-/* ==================== 词汇配对（双人 6词 2列） ==================== */
-.duel-wrapper{background:linear-gradient(135deg,#f8fafc 0%,#eef4fc 100%);border-radius:28px;padding:24px;box-shadow:inset 0 0 40px rgba(59,124,255,.04)}
-.duel-header{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-bottom:20px;align-items:center}
-.duel-container{display:grid;grid-template-columns:1fr 1fr;gap:20px;position:relative}
-.duel-container::before{content:'';position:absolute;left:50%;top:0;bottom:0;width:2px;background:linear-gradient(180deg,transparent,#dce4ec 20%,#dce4ec 80%,transparent);transform:translateX(-50%);pointer-events:none;z-index:0}
-.duel-player{background:#fff;border-radius:24px;padding:18px;border:3px solid #e6edf4;box-shadow:0 8px 24px rgba(0,0,0,.06);transition:all .35s ease;position:relative;z-index:1;overflow:hidden}
-.duel-player::before{content:'';position:absolute;top:0;left:0;right:0;height:6px;transition:all .3s ease}
-.duel-player#duelPlayer1{border-color:#fca5a5;background:linear-gradient(180deg,#fff5f5 0%,#ffffff 30%)}
-.duel-player#duelPlayer1::before{background:linear-gradient(90deg,#ef4444,#f87171,#ef4444)}
-.duel-player#duelPlayer2{border-color:#93c5fd;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 30%)}
-.duel-player#duelPlayer2::before{background:linear-gradient(90deg,#3b82f6,#60a5fa,#3b82f6)}
-.duel-player.finished{background:linear-gradient(180deg,#ecfdf5 0%,#e0f2e6 100%);border-color:#0b6e4f !important;box-shadow:0 8px 32px rgba(11,110,79,.20);animation:winPulse 1.2s ease}
-.duel-player.finished::before{background:linear-gradient(90deg,#10b981,#34d399,#10b981);animation:shimmerBar 1.5s linear infinite;background-size:200% 100%}
-@keyframes winPulse{0%{transform:scale(1)}30%{transform:scale(1.02)}100%{transform:scale(1)}}
-@keyframes shimmerBar{0%{background-position:0% 50%}100%{background-position:200% 50%}}
-.duel-player-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:12px;border-bottom:2px dashed #e6edf4}
-.duel-player-name{font-weight:800;font-size:18px;letter-spacing:.5px}
-.duel-timer{font-size:24px;font-weight:800;font-family:'Courier New',monospace;background:linear-gradient(135deg,#0b6e4f,#0a5a40);color:#fff;padding:4px 14px;border-radius:12px;letter-spacing:2px;box-shadow:0 4px 12px rgba(11,110,79,.3);min-width:90px;text-align:center;transition:all .2s}
-.duel-progress-wrap{margin-bottom:14px}
-.duel-progress-text{display:flex;justify-content:space-between;font-size:13px;color:#5a6c7d;font-weight:600;margin-bottom:6px}
-.duel-progress-bar{height:10px;background:#e6edf4;border-radius:10px;overflow:hidden;position:relative}
-.duel-progress-fill{height:100%;border-radius:10px;transition:width .35s ease;background-size:200% 100%;animation:barShimmer 2s linear infinite}
-@keyframes barShimmer{0%{background-position:0% 50%}100%{background-position:200% 50%}}
-#duelPlayer1 .duel-progress-fill{background-image:linear-gradient(90deg,#ef4444,#f87171,#ef4444)}
-#duelPlayer2 .duel-progress-fill{background-image:linear-gradient(90deg,#3b82f6,#60a5fa,#3b82f6)}
+/* 以下为词汇配对双人 */
+.duel-word-card { background: #fff; border-radius: 12px; padding: 12px 8px; cursor: pointer; transition: all 0.2s; font-weight: 700; color: #1a2a3a; border: 2px solid #e6edf4; display:flex; align-items:center; justify-content:center; text-align:center; word-break:break-word; min-height:62px; box-shadow:0 2px 6px rgba(0,0,0,.04); }
+#duelPlayer1 .duel-word-card { border-color: #fecaca; }
+#duelPlayer1 .duel-word-card:hover { border-color: #ef4444; transform: translateY(-3px); box-shadow: 0 8px 20px rgba(239,68,68,.18); }
+#duelPlayer2 .duel-word-card { border-color: #bfdbfe; }
+#duelPlayer2 .duel-word-card:hover { border-color: #3b82f6; transform: translateY(-3px); box-shadow: 0 8px 20px rgba(59,130,246,.18); }
+.duel-word-card.active { border-color: #3b7cff; background: linear-gradient(135deg,#e0edff,#d4e4ff); box-shadow: 0 0 0 4px rgba(59,124,255,.18), 0 8px 20px rgba(59,124,255,.20); transform: translateY(-2px) scale(1.02); }
+#duelPlayer1 .duel-word-card.active { border-color: #ef4444; background: linear-gradient(135deg,#fee2e2,#fecaca); box-shadow: 0 0 0 4px rgba(239,68,68,.20), 0 8px 20px rgba(239,68,68,.22); }
+#duelPlayer2 .duel-word-card.active { border-color: #3b82f6; background: linear-gradient(135deg,#dbeafe,#bfdbfe); box-shadow: 0 0 0 4px rgba(59,130,246,.20), 0 8px 20px rgba(59,130,246,.22); }
+.duel-word-card.matched { opacity: 0; transform: scale(.55) rotate(-4deg); pointer-events: none; visibility: hidden; transition: opacity .55s ease, transform .55s cubic-bezier(.22,1,.36,1); }
+.duel-word-card.wrong { background: linear-gradient(135deg,#fee2e2,#fecaca); border-color: #ef4444; color: #991b1b; animation: duelShake .45s; }
 
-/* 恢复 2 列布局 */
-.duel-board{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;min-height:340px;align-content:start;touch-action:manipulation}
-.duel-card{padding:12px 8px;border-radius:14px;border:2px solid #e6edf4;background:#fff;cursor:pointer;font-size:15px;text-align:center;transition:all .2s cubic-bezier(.34,1.56,.64,1);font-weight:700;color:#1a2a3a;line-height:1.35;word-break:break-word;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation;min-height:62px;display:flex;align-items:center;justify-content:center;position:relative;box-shadow:0 2px 6px rgba(0,0,0,.04)}
-.duel-card::after{content:'';position:absolute;inset:0;border-radius:12px;background:linear-gradient(135deg,rgba(59,124,255,.08),transparent 60%);opacity:0;transition:opacity .2s;pointer-events:none}
-#duelPlayer1 .duel-card{border-color:#fecaca;background:linear-gradient(180deg,#fff,#fff9f9)}
-#duelPlayer1 .duel-card:hover{border-color:#ef4444;transform:translateY(-3px);box-shadow:0 8px 20px rgba(239,68,68,.18)}
-#duelPlayer2 .duel-card{border-color:#bfdbfe;background:linear-gradient(180deg,#fff,#f9fbff)}
-#duelPlayer2 .duel-card:hover{border-color:#3b82f6;transform:translateY(-3px);box-shadow:0 8px 20px rgba(59,130,246,.18)}
-.duel-card:hover::after{opacity:1}
-.duel-card.active{border-color:#3b7cff;background:linear-gradient(135deg,#e0edff,#d4e4ff);box-shadow:0 0 0 4px rgba(59,124,255,.18),0 8px 20px rgba(59,124,255,.20);transform:translateY(-2px) scale(1.02)}
-#duelPlayer1 .duel-card.active{border-color:#ef4444;background:linear-gradient(135deg,#fee2e2,#fecaca);box-shadow:0 0 0 4px rgba(239,68,68,.20),0 8px 20px rgba(239,68,68,.22)}
-#duelPlayer2 .duel-card.active{border-color:#3b82f6;background:linear-gradient(135deg,#dbeafe,#bfdbfe);box-shadow:0 0 0 4px rgba(59,130,246,.20),0 8px 20px rgba(59,130,246,.22)}
-.duel-card.matched{opacity:0;transform:scale(.55) rotate(-4deg);pointer-events:none;visibility:hidden;transition:opacity .55s ease,transform .55s cubic-bezier(.22,1,.36,1)}
-.duel-card.wrong{background:linear-gradient(135deg,#fee2e2,#fecaca);border-color:#ef4444;color:#991b1b;animation:duelShake .45s}
-@keyframes duelShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px) rotate(-2deg)}40%{transform:translateX(6px) rotate(2deg)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
-.duel-result{text-align:center;font-size:24px;font-weight:800;margin-top:24px;min-height:36px;padding:0 16px;transition:all .3s}
-.duel-result.win1{color:#dc2626;text-shadow:0 2px 12px rgba(220,38,38,.2)}
-.duel-result.win2{color:#3b7cff;text-shadow:0 2px 12px rgba(59,124,255,.2)}
-.duel-result.draw{color:#8a5a00;text-shadow:0 2px 12px rgba(138,90,0,.2)}
-.duel-result.waiting{color:#5a6c7d;font-size:18px;font-weight:600}
-.duel-result .result-emoji{display:inline-block;font-size:32px;vertical-align:middle;margin-right:10px;animation:bounce 1s ease infinite}
-@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+/* 彩带 */
 .confetti{position:fixed;top:-20px;width:10px;height:16px;opacity:.9;pointer-events:none;z-index:9999;animation:confettiFall linear forwards}
 @keyframes confettiFall{to{transform:translateY(110vh) rotate(720deg);opacity:0}}
-@media (max-width:900px){.duel-container{grid-template-columns:1fr}.duel-container::before{display:none}}
 
-/* ==================== 词云 ==================== */
+
+/* ==================== 词云 / 翻牌子 / 填空 / 争霸赛 / 回音壁 ==================== */
 .wordcloud-display{display:flex;flex-wrap:wrap;gap:16px 24px;padding:24px 16px;background:#fff;border-radius:24px;min-height:200px;border:2px dashed #dce4ec;justify-content:center;align-items:center}
 .cloud-item{background:#f0f6fb;padding:10px 20px;border-radius:40px;border:1px solid #e6edf4;font-size:16px;display:inline-flex;align-items:center;gap:8px}
 .cloud-item .student{font-weight:700;color:#3b7cff}
@@ -161,8 +162,6 @@ body{font-family:'Segoe UI','PingFang SC',sans-serif;background:#f0f6fb;min-heig
 .no-msg{color:#8a9aa8;font-size:16px}
 .qr-section{display:flex;align-items:center;gap:30px;flex-wrap:wrap;margin-bottom:20px;padding:16px 20px;background:#fff;border-radius:20px;border:1px solid #e6edf4}
 .qr-section #qrCode{background:#fff;padding:12px;border-radius:16px;display:inline-block}
-
-/* ==================== 翻牌子 ==================== */
 .flip-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;justify-items:center;padding:20px 0}
 .flip-card{width:100%;max-width:150px;aspect-ratio:1/1;perspective:800px;cursor:pointer}
 .flip-card-inner{width:100%;height:100%;transition:transform .4s;transform-style:preserve-3d;position:relative}
@@ -173,8 +172,6 @@ body{font-family:'Segoe UI','PingFang SC',sans-serif;background:#f0f6fb;min-heig
 .flip-card-back .pinyin{font-size:20px;font-weight:600;color:#3b7cff}
 .flip-card-back .trans{font-size:14px;color:#5a6c7d;margin-top:4px}
 .flip-card .cover{font-size:52px;color:#b0c0d0}
-
-/* ==================== 填空 ==================== */
 .fill-area{padding:20px 0}
 .fill-sentence{font-size:26px;font-weight:600;color:#1a2a3a;margin-bottom:8px;line-height:2.2}
 .fill-sentence .blank{display:inline-block;min-width:100px;padding:0 8px;border:2px dashed #3b7cff;border-radius:8px;background:#fff;color:#1a2a3a;font-weight:600;text-align:center;line-height:2;margin:0 6px}
@@ -187,8 +184,6 @@ body{font-family:'Segoe UI','PingFang SC',sans-serif;background:#f0f6fb;min-heig
 .fill-student-answers .answer-item .name{font-weight:500;color:#2c3e50}
 .fill-student-answers .answer-item .ans{color:#0b6e4f}
 .fill-student-answers .empty{color:#8a9aa8;font-size:14px;text-align:center;padding:12px 0}
-
-/* ==================== 争霸赛 ==================== */
 .quiz-setup{background:#f8fafc;border-radius:20px;padding:24px;margin-bottom:20px;border:1px solid #e6edf4}
 .quiz-setup h3{font-size:18px;color:#1a2a3a;margin-bottom:16px}
 .quiz-row{display:flex;gap:16px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
@@ -217,8 +212,6 @@ body{font-family:'Segoe UI','PingFang SC',sans-serif;background:#f0f6fb;min-heig
 .quiz-buzz-info.wrong{background:#fee2e2;color:#991b1b}
 .quiz-judge{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:12px}
 .quiz-wrong-groups{margin-top:8px;font-size:13px;color:#991b1b;text-align:center}
-
-/* ==================== 回音壁 ==================== */
 .echo-btn{position:fixed;right:24px;bottom:24px;width:68px;height:68px;border-radius:50%;background:linear-gradient(135deg,#3b7cff,#2a6ae0);color:#fff;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 8px 28px rgba(59,124,255,.40);z-index:999;transition:all .2s}
 .echo-btn:hover{transform:scale(1.08)}
 .echo-btn:active{transform:scale(.95)}
@@ -276,6 +269,7 @@ body{font-family:'Segoe UI','PingFang SC',sans-serif;background:#f0f6fb;min-heig
 <div class="multi-select-dropdown" id="courseDropdown">
 <label class="dropdown-item"><input type="checkbox" class="course-check" value="lesson1" checked><span>第1课</span></label>
 <label class="dropdown-item"><input type="checkbox" class="course-check" value="lesson2" checked><span>第2课</span></label>
+<label class="dropdown-item"><input type="checkbox" class="course-check" value="lesson3" checked><span>第3课</span></label>
 </div>
 </div>
 </div>
@@ -287,15 +281,11 @@ body{font-family:'Segoe UI','PingFang SC',sans-serif;background:#f0f6fb;min-heig
 <button class="module-btn" data-module="fill"><span class="icon">✍️</span>选词填空</button>
 <button class="module-btn" data-module="quiz"><span class="icon">🏆</span>争霸赛</button>
 </div>
-
-<!-- MQTT 状态与连接 -->
 <div class="mqtt-status">
 <span class="dot offline" id="mqttDot"></span>
 <span id="mqttText">未连接</span>
 </div>
 <button class="btn-connect" id="mqttConnectBtn">连接 MQTT</button>
-
-<!-- 底部隐藏按钮 -->
 <div class="sidebar-bottom">
 <button class="btn-hide-sidebar" id="btnHideSidebar">◀ 隐藏侧边栏</button>
 </div>
@@ -303,7 +293,6 @@ body{font-family:'Segoe UI','PingFang SC',sans-serif;background:#f0f6fb;min-heig
 
 <!-- 主体内容 -->
 <div class="main">
-<!-- 顶部工具栏 -->
 <div class="main-header">
   <div class="main-header-left">
     <button class="btn-action btn-show-sidebar" id="btnShowSidebar">▶ 展开菜单</button>
@@ -312,17 +301,58 @@ body{font-family:'Segoe UI','PingFang SC',sans-serif;background:#f0f6fb;min-heig
   <button class="btn-action btn-fullscreen" id="btnFullscreen">⛶ 全屏显示</button>
 </div>
 
+<!-- ===== 单字组词 ===== -->
 <div id="panel-word" class="panel active">
-<div class="flex-center mt-8">
-<button class="btn btn-success" id="newWordGroup">🔄 新的一组（5词）</button>
-<span class="badge">本轮已练: <strong id="usedCount">0</strong> / <span id="totalCountDisplay">0</span> 词</span>
-</div>
-<div class="char-grid" id="charGrid"></div>
-<div class="progress-area" id="progressMsg">点击汉字按顺序组成词语</div>
-<div class="word-result" id="wordResult"></div>
-<div class="text-center" id="wordCompleteMsg" style="font-weight:600;font-size:18px;color:#0b6e4f;"></div>
+  <!-- 单字单人 -->
+  <div id="wordSingleMode">
+    <div class="flex-center mt-8" style="margin-bottom:16px;">
+      <label style="font-weight:600;color:#2c3e50;margin-right:4px;">玩法：</label>
+      <select id="wordModeSelect" style="padding:8px 14px;border-radius:12px;border:1.5px solid #dce4ec;font-size:14px;">
+        <option value="single">👤 单人模式（全班一起）</option>
+        <option value="duel">⚔️ 双人对决（拼词比赛）</option>
+      </select>
+      <button class="btn btn-success" id="newWordGroup">🔄 新的一组（5词）</button>
+      <span class="badge">本轮已练: <strong id="usedCount">0</strong> / <span id="totalCountDisplay">0</span> 词</span>
+    </div>
+    <div class="char-grid" id="charGrid"></div>
+    <div class="progress-area" id="progressMsg">点击汉字按顺序组成词语</div>
+    <div class="word-result" id="wordResult"></div>
+    <div class="text-center" id="wordCompleteMsg" style="font-weight:600;font-size:18px;color:#0b6e4f;"></div>
+  </div>
+
+  <!-- 单字双人 -->
+  <div id="wordDuelMode" style="display:none;">
+    <div class="duel-wrapper">
+      <div class="duel-header">
+        <button class="btn btn-primary" id="wordDuelNewBtn">🔄 换一组词</button>
+        <span style="color:#5a6c7d;font-size:13px;margin-left:8px;">💡 根据上方的词义线索，把打乱的汉字拼成词</span>
+      </div>
+      <div class="duel-container">
+        <!-- 玩家1 -->
+        <div class="duel-player" id="wordDuelPlayer1">
+          <div class="duel-player-header">
+            <span class="duel-player-name" style="color:#dc2626;">🔴 玩家 1</span>
+            <span class="duel-timer" id="wordDuelTimer1">00:00</span>
+          </div>
+          <div class="duel-clues" id="wordDuelClues1"></div>
+          <div class="duel-grid" id="wordDuelGrid1"></div>
+        </div>
+        <!-- 玩家2 -->
+        <div class="duel-player" id="wordDuelPlayer2">
+          <div class="duel-player-header">
+            <span class="duel-player-name" style="color:#3b7cff;">🔵 玩家 2</span>
+            <span class="duel-timer" id="wordDuelTimer2">00:00</span>
+          </div>
+          <div class="duel-clues" id="wordDuelClues2"></div>
+          <div class="duel-grid" id="wordDuelGrid2"></div>
+        </div>
+      </div>
+      <div class="duel-result-msg" id="wordDuelMsg"></div>
+    </div>
+  </div>
 </div>
 
+<!-- ===== 词汇配对 ===== -->
 <div id="panel-pair" class="panel">
 <div class="flex-center mt-8" style="margin-bottom:16px;">
 <label style="font-weight:600;color:#2c3e50;margin-right:4px;">配对模式：</label>
@@ -334,6 +364,7 @@ body{font-family:'Segoe UI','PingFang SC',sans-serif;background:#f0f6fb;min-heig
 <span class="badge">本轮已练: <strong id="pairUsedCount">0</strong> / <span id="pairTotalCount">0</span> 词</span>
 </div>
 
+<!-- 词汇单人 -->
 <div id="pairSingleMode">
 <div class="pair-batch-info" id="pairBatchInfo">点击左边词，再点击右边对应项配对</div>
 <div class="pair-area">
@@ -344,6 +375,7 @@ body{font-family:'Segoe UI','PingFang SC',sans-serif;background:#f0f6fb;min-heig
 <div class="text-center" id="pairCompleteMsg" style="font-weight:600;font-size:18px;color:#0b6e4f;"></div>
 </div>
 
+<!-- 词汇双人 -->
 <div id="pairDuelMode" style="display:none;">
 <div class="duel-wrapper">
 <div class="duel-header">
@@ -361,7 +393,7 @@ body{font-family:'Segoe UI','PingFang SC',sans-serif;background:#f0f6fb;min-heig
 <div class="duel-progress-text"><span>配对进度</span><span id="duelProgressText1">0 / 6</span></div>
 <div class="duel-progress-bar"><div class="duel-progress-fill" id="duelProgress1" style="width:0%"></div></div>
 </div>
-<div class="duel-board" id="duelBoard1"></div>
+<div class="duel-board" id="duelBoard1" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;"></div>
 </div>
 <div class="duel-player" id="duelPlayer2">
 <div class="duel-player-header">
@@ -372,7 +404,7 @@ body{font-family:'Segoe UI','PingFang SC',sans-serif;background:#f0f6fb;min-heig
 <div class="duel-progress-text"><span>配对进度</span><span id="duelProgressText2">0 / 6</span></div>
 <div class="duel-progress-bar"><div class="duel-progress-fill" id="duelProgress2" style="width:0%"></div></div>
 </div>
-<div class="duel-board" id="duelBoard2"></div>
+<div class="duel-board" id="duelBoard2" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;"></div>
 </div>
 </div>
 <div class="duel-result" id="duelResult"></div>
@@ -380,6 +412,7 @@ body{font-family:'Segoe UI','PingFang SC',sans-serif;background:#f0f6fb;min-heig
 </div>
 </div>
 
+<!-- ===== 词云 ===== -->
 <div id="panel-cloud" class="panel">
 <div class="qr-section"><div id="qrCode"></div><div><strong>📱 学生扫码参与</strong><br>学生扫描二维码进入学生端，提交词汇。</div></div>
 <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
@@ -389,6 +422,7 @@ body{font-family:'Segoe UI','PingFang SC',sans-serif;background:#f0f6fb;min-heig
 <div class="wordcloud-display" id="cloudDisplay"><span class="no-msg">等待学生输入…</span></div>
 </div>
 
+<!-- ===== 翻牌子 ===== -->
 <div id="panel-flip" class="panel">
 <div class="flex-center mt-8">
 <button class="btn btn-success" id="newFlipSet">🔄 新的一组（6词）</button>
@@ -398,6 +432,7 @@ body{font-family:'Segoe UI','PingFang SC',sans-serif;background:#f0f6fb;min-heig
 <div class="flip-grid" id="flipGrid"></div>
 </div>
 
+<!-- ===== 选词填空 ===== -->
 <div id="panel-fill" class="panel">
 <div class="fill-area">
 <div class="fill-controls">
@@ -419,6 +454,7 @@ body{font-family:'Segoe UI','PingFang SC',sans-serif;background:#f0f6fb;min-heig
 </div>
 </div>
 
+<!-- ===== 争霸赛 ===== -->
 <div id="panel-quiz" class="panel">
 <div id="quizSetup">
 <div class="quiz-setup">
@@ -465,6 +501,7 @@ body{font-family:'Segoe UI','PingFang SC',sans-serif;background:#f0f6fb;min-heig
 </div>
 </div>
 
+<!-- ===== 回音壁 ===== -->
 <button class="echo-btn" id="echoBtn" title="回音壁">
 <span class="icon">📱</span>
 <span class="label">回音壁</span>
@@ -486,6 +523,7 @@ body{font-family:'Segoe UI','PingFang SC',sans-serif;background:#f0f6fb;min-heig
 <div class="echo-course">
 <label><input type="checkbox" class="echo-course-cb" value="lesson1" checked> 第1课</label>
 <label><input type="checkbox" class="echo-course-cb" value="lesson2" checked> 第2课</label>
+<label><input type="checkbox" class="echo-course-cb" value="lesson3" checked> 第3课</label>
 </div>
 </div>
 <button class="echo-sync-btn" id="echoSyncBtn">🚀 同步当前模块到学生端</button>
@@ -502,64 +540,13 @@ body{font-family:'Segoe UI','PingFang SC',sans-serif;background:#f0f6fb;min-heig
 <script>
 // ==================== 词库 ====================
 const LESSON1=[
-{word:'前面',pinyin:'qián miàn',en:'front',ru:'впереди'},
-{word:'教学楼',pinyin:'jiào xué lóu',en:'classroom building',ru:'учебный корпус'},
-{word:'国际',pinyin:'guó jì',en:'international',ru:'международный'},
-{word:'办公室',pinyin:'bàn gōng shì',en:'office',ru:'офис'},
-{word:'里',pinyin:'lǐ',en:'inside',ru:'внутри'},
-{word:'位',pinyin:'wèi',en:'measure word for people',ru:'счётное слово для людей'},
-{word:'向',pinyin:'xiàng',en:'toward',ru:'по направлению к'},
-{word:'左边',pinyin:'zuǒ biān',en:'left side',ru:'слева'},
-{word:'食堂',pinyin:'shí táng',en:'canteen',ru:'столовая'},
-{word:'右边',pinyin:'yòu biān',en:'right side',ru:'справа'},
-{word:'网球场',pinyin:'wǎng qiú chǎng',en:'tennis field',ru:'теннисный корт'},
-{word:'图书馆',pinyin:'tú shū guǎn',en:'library',ru:'библиотека'},
-{word:'对面',pinyin:'duì miàn',en:'opposite',ru:'напротив'},
-{word:'足球场',pinyin:'zú qiú chǎng',en:'football field',ru:'футбольное поле'},
-{word:'附近',pinyin:'fù jìn',en:'nearby',ru:'рядом, поблизости'},
-{word:'东边',pinyin:'dōng biān',en:'east side',ru:'на востоке'},
-{word:'东西',pinyin:'dōng xi',en:'thing; stuff',ru:'вещь'},
-{word:'方便',pinyin:'fāng biàn',en:'convenient',ru:'удобный'},
-{word:'开',pinyin:'kāi',en:'to open',ru:'открывать'},
-{word:'咖啡厅',pinyin:'kā fēi tīng',en:'coffee shop',ru:'кафе'},
-{word:'尝',pinyin:'cháng',en:'to taste',ru:'пробовать на вкус'},
-{word:'自习',pinyin:'zì xí',en:'to study by oneself',ru:'самостоятельно учиться'},
-{word:'一会儿',pinyin:'yí huì er',en:'a short while',ru:'немного времени'},
-{word:'放松',pinyin:'fàng sōng',en:'relax',ru:'расслабляться'},
-{word:'教室',pinyin:'jiào shì',en:'classroom',ru:'аудитория'},
-{word:'中间',pinyin:'zhōng jiān',en:'middle',ru:'посередине'},
-{word:'旁边',pinyin:'páng biān',en:'side; next to',ru:'рядом'},
-{word:'那里',pinyin:'nà lǐ',en:'there',ru:'там'},
-{word:'关于',pinyin:'guān yú',en:'about',ru:'о, насчёт'},
-{word:'选课',pinyin:'xuǎn kè',en:'to select a course',ru:'выбирать курс'},
-{word:'讲座',pinyin:'jiǎng zuò',en:'lecture',ru:'лекция'},
-{word:'顺便',pinyin:'shùn biàn',en:'by the way',ru:'попутно, заодно'}
+{word:'前面',pinyin:'qián miàn',en:'front',ru:'впереди'},{word:'教学楼',pinyin:'jiào xué lóu',en:'classroom building',ru:'учебный корпус'},{word:'国际',pinyin:'guó jì',en:'international',ru:'международный'},{word:'办公室',pinyin:'bàn gōng shì',en:'office',ru:'офис'},{word:'里',pinyin:'lǐ',en:'inside',ru:'внутри'},{word:'位',pinyin:'wèi',en:'mw for people',ru:'мест'},{word:'向',pinyin:'xiàng',en:'toward',ru:'к'},{word:'左边',pinyin:'zuǒ biān',en:'left side',ru:'слева'},{word:'食堂',pinyin:'shí táng',en:'canteen',ru:'столовая'},{word:'右边',pinyin:'yòu biān',en:'right side',ru:'справа'},{word:'网球场',pinyin:'wǎng qiú chǎng',en:'tennis field',ru:'корт'},{word:'图书馆',pinyin:'tú shū guǎn',en:'library',ru:'библиотека'},{word:'对面',pinyin:'duì miàn',en:'opposite',ru:'напротив'},{word:'足球场',pinyin:'zú qiú chǎng',en:'football field',ru:'поле'},{word:'附近',pinyin:'fù jìn',en:'nearby',ru:'рядом'},{word:'东边',pinyin:'dōng biān',en:'east side',ru:'восток'},{word:'东西',pinyin:'dōng xi',en:'thing',ru:'вещь'},{word:'方便',pinyin:'fāng biàn',en:'convenient',ru:'удобно'},{word:'开',pinyin:'kāi',en:'to open',ru:'открыть'},{word:'咖啡厅',pinyin:'kā fēi tīng',en:'coffee shop',ru:'кафе'},{word:'尝',pinyin:'cháng',en:'to taste',ru:'пробовать'},{word:'自习',pinyin:'zì xí',en:'to study by oneself',ru:'самостоятельно'},{word:'一会儿',pinyin:'yí huì er',en:'a short while',ru:'немного'},{word:'放松',pinyin:'fàng sōng',en:'relax',ru:'расслабиться'},{word:'教室',pinyin:'jiào shì',en:'classroom',ru:'аудитория'},{word:'中间',pinyin:'zhōng jiān',en:'middle',ru:'посередине'},{word:'旁边',pinyin:'páng biān',en:'side',ru:'рядом'},{word:'那里',pinyin:'nà lǐ',en:'there',ru:'там'},{word:'关于',pinyin:'guān yú',en:'about',ru:'о'},{word:'选课',pinyin:'xuǎn kè',en:'select course',ru:'выбор курса'},{word:'讲座',pinyin:'jiǎng zuò',en:'lecture',ru:'лекция'},{word:'顺便',pinyin:'shùn biàn',en:'by the way',ru:'заодно'}
 ];
 const LESSON2=[
-{word:'一下',pinyin:'yí xià',en:'one time; once',ru:'один раз'},
-{word:'当然',pinyin:'dāng rán',en:'of course',ru:'конечно'},
-{word:'试衣间',pinyin:'shì yī jiān',en:'fitting room',ru:'примерочная'},
-{word:'条',pinyin:'tiáo',en:'mw for long thin items',ru:'счётное слово'},
-{word:'一点儿',pinyin:'yì diǎn er',en:'a little; a bit',ru:'немного'},
-{word:'黑色',pinyin:'hēi sè',en:'black',ru:'чёрный'},
-{word:'小号',pinyin:'xiǎo hào',en:'small size',ru:'маленький размер'},
-{word:'红色',pinyin:'hóng sè',en:'red',ru:'красный'},
-{word:'问',pinyin:'wèn',en:'to ask',ru:'спрашивать'},
-{word:'店',pinyin:'diàn',en:'shop',ru:'магазин'},
-{word:'裙子',pinyin:'qún zi',en:'dress; skirt',ru:'юбка, платье'},
-{word:'打折',pinyin:'dǎ zhé',en:'to offer a discount',ru:'давать скидку'},
-{word:'双',pinyin:'shuāng',en:'double; pair',ru:'пара'},
-{word:'网上',pinyin:'wǎng shang',en:'on the internet',ru:'в интернете'},
-{word:'网购',pinyin:'wǎng gòu',en:'to shop online',ru:'покупки в интернете'},
-{word:'一些',pinyin:'yì xiē',en:'some',ru:'немного'},
-{word:'本子',pinyin:'běn zi',en:'notebook',ru:'тетрадь'},
-{word:'节省',pinyin:'jié shěng',en:'to save',ru:'экономить'},
-{word:'当时',pinyin:'dāng shí',en:'at that time',ru:'тогда'},
-{word:'货',pinyin:'huò',en:'goods',ru:'товар'},
-{word:'取',pinyin:'qǔ',en:'to fetch, to get',ru:'забирать'},
-{word:'地址',pinyin:'dì zhǐ',en:'address',ru:'адрес'},
-{word:'让',pinyin:'ràng',en:'to let, allow',ru:'позволять'},
-{word:'快递',pinyin:'kuài dì',en:'express delivery',ru:'курьер'}
+{word:'一下',pinyin:'yí xià',en:'one time',ru:'один раз'},{word:'当然',pinyin:'dāng rán',en:'of course',ru:'конечно'},{word:'试衣间',pinyin:'shì yī jiān',en:'fitting room',ru:'примерочная'},{word:'条',pinyin:'tiáo',en:'mw for long items',ru:'счётное слово'},{word:'一点儿',pinyin:'yì diǎn er',en:'a little',ru:'немного'},{word:'黑色',pinyin:'hēi sè',en:'black',ru:'чёрный'},{word:'小号',pinyin:'xiǎo hào',en:'small size',ru:'маленький размер'},{word:'红色',pinyin:'hóng sè',en:'red',ru:'красный'},{word:'问',pinyin:'wèn',en:'to ask',ru:'спрашивать'},{word:'店',pinyin:'diàn',en:'shop',ru:'магазин'},{word:'裙子',pinyin:'qún zi',en:'dress; skirt',ru:'юбка'},{word:'打折',pinyin:'dǎ zhé',en:'discount',ru:'скидка'},{word:'双',pinyin:'shuāng',en:'pair',ru:'пара'},{word:'网上',pinyin:'wǎng shang',en:'online',ru:'в сети'},{word:'网购',pinyin:'wǎng gòu',en:'shop online',ru:'онлайн покупки'},{word:'一些',pinyin:'yì xiē',en:'some',ru:'несколько'},{word:'本子',pinyin:'běn zi',en:'notebook',ru:'тетрадь'},{word:'节省',pinyin:'jié shěng',en:'to save',ru:'экономить'},{word:'当时',pinyin:'dāng shí',en:'at that time',ru:'тогда'},{word:'货',pinyin:'huò',en:'goods',ru:'товар'},{word:'取',pinyin:'qǔ',en:'to fetch',ru:'забрать'},{word:'地址',pinyin:'dì zhǐ',en:'address',ru:'адрес'},{word:'让',pinyin:'ràng',en:'to let',ru:'позволять'},{word:'快递',pinyin:'kuài dì',en:'express',ru:'курьер'}
+];
+const LESSON3=[
+{word:'菜单',pinyin:'cài dān',en:'menu',ru:'меню'},{word:'这里',pinyin:'zhè lǐ',en:'here',ru:'здесь'},{word:'水煮鱼',pinyin:'shuǐ zhǔ yú',en:'spicy boiled fish',ru:'рыба в масле'},{word:'从小',pinyin:'cóng xiǎo',en:'since childhood',ru:'с детства'},{word:'份',pinyin:'fèn',en:'portion',ru:'порция'},{word:'西红柿',pinyin:'xī hóng shì',en:'tomato',ru:'помидор'},{word:'炒',pinyin:'chǎo',en:'stir-fry',ru:'жарить'},{word:'鸡蛋',pinyin:'jī dàn',en:'egg',ru:'яйцо'},{word:'半价',pinyin:'bàn jià',en:'half price',ru:'полцены'},{word:'特色菜',pinyin:'tè sè cài',en:'specialty',ru:'фирменное блюдо'},{word:'麻婆豆腐',pinyin:'má pó dòu fu',en:'Mapo Tofu',ru:'мапо тофу'},{word:'麻',pinyin:'má',en:'numbing',ru:'острый'},{word:'碗',pinyin:'wǎn',en:'bowl',ru:'чашка'},{word:'筷子',pinyin:'kuài zi',en:'chopsticks',ru:'палочки'},{word:'稍等',pinyin:'shāo děng',en:'wait a moment',ru:'подождите'},{word:'餐馆儿',pinyin:'cān guǎn er',en:'restaurant',ru:'ресторан'},{word:'长',pinyin:'zhǎng',en:'grow',ru:'расти'},{word:'锻炼',pinyin:'duàn liàn',en:'exercise',ru:'тренироваться'},{word:'结账',pinyin:'jié zhàng',en:'pay bill',ru:'оплатить'},{word:'张',pinyin:'zhāng',en:'sheet',ru:'лист'},{word:'餐巾纸',pinyin:'cān jīn zhǐ',en:'tissue',ru:'салфетка'},{word:'开心',pinyin:'kāi xīn',en:'happy',ru:'счастливый'},{word:'冰淇淋',pinyin:'bīng qí lín',en:'ice cream',ru:'мороженое'},{word:'排名',pinyin:'pái míng',en:'rank',ru:'рейтинг'},{word:'餐厅',pinyin:'cān tīng',en:'restaurant',ru:'ресторан'},{word:'以后',pinyin:'yǐ hòu',en:'later',ru:'потом'}
 ];
 
 const LESSON1_SENTENCES=[
@@ -589,6 +576,21 @@ const LESSON2_SENTENCES=[
 {sentence:'他________我帮他一个忙。',answer:'让',translation:'He asked me to help him with something.'},
 {sentence:'我去取________。',answer:'快递',translation:'I am going to pick up my package.'},
 {sentence:'这________书是谁的？',answer:'本',translation:'Whose book is this?'}
+];
+const LESSON3_SENTENCES=[
+{sentence:'服务员，请给我一份________。',answer:'菜单',translation:'Waiter, please give me a menu.'},
+{sentence:'我是四川人，________就喜欢吃辣的。',answer:'从小',translation:'I am from Sichuan, I have liked spicy food since childhood.'},
+{sentence:'今天西红柿炒鸡蛋________，要尝尝吗？',answer:'半价',translation:'Today tomato and egg stir-fry is half price, do you want to try it?'},
+{sentence:'这些________又好吃又________。',answer:'特色菜、便宜',translation:'These specialty dishes are both delicious and cheap.'},
+{sentence:'麻婆豆腐又________又辣！',answer:'麻',translation:'Mapo Tofu is numbing and spicy!'},
+{sentence:'服务员，请再给我们两个________和一双________。',answer:'碗、筷子',translation:'Waiter, please give us two more bowls and a pair of chopsticks.'},
+{sentence:'这家________的菜味道真好。',answer:'餐馆儿',translation:'The food in this restaurant tastes really good.'},
+{sentence:'我们一会儿去________吧！',answer:'锻炼',translation:'Let\'s go exercise later!'},
+{sentence:'服务员，________。',answer:'结账',translation:'Waiter, the bill please.'},
+{sentence:'请再给我们几________餐巾纸。',answer:'张',translation:'Please give us a few more napkins.'},
+{sentence:'今天真________，老板还送了咱们两份冰淇淋。',answer:'开心',translation:'I am so happy today, the boss even gave us two ice creams.'},
+{sentence:'这是网上________前十的餐厅。',answer:'排名',translation:'This is a top ten ranked restaurant online.'},
+{sentence:'我们________可以常来！',answer:'以后',translation:'We can come here often in the future!'}
 ];
 
 const QUIZ_SENTENCES={
@@ -621,6 +623,19 @@ lesson2:[
 {full:'你可以给他们你的地址。',words:['你','可以','给','他们','你的','地址']},
 {full:'让他们快递给你。',words:['让','他们','快递','给','你']},
 {full:'这真是个好主意！',words:['这','真','是','个','好','主意']}
+],
+lesson3:[
+{full:'服务员，请给我一份菜单。',words:['服务员','请','给','我','一份','菜单']},
+{full:'水煮鱼又麻又辣。',words:['水煮鱼','又','麻','又','辣']},
+{full:'这些特色菜又好吃又便宜。',words:['这些','特色菜','又','好吃','又','便宜']},
+{full:'我从小就喜欢吃辣的。',words:['我','从小','就','喜欢','吃','辣的']},
+{full:'来一份麻婆豆腐。',words:['来','一份','麻婆豆腐']},
+{full:'这家餐厅排名前十。',words:['这','家','餐厅','排名','前十']},
+{full:'我们以后可以常来。',words:['我们','以后','可以','常来']},
+{full:'请给我们两张餐巾纸。',words:['请','给','我们','两张','餐巾纸']},
+{full:'大夫让他每天锻炼一小时。',words:['大夫','让','他','每天','锻炼','一小时']},
+{full:'我常常去这家餐馆儿吃饭。',words:['我','常常','去','这家','餐馆儿','吃饭']},
+{full:'他问了老师一个问题。',words:['他','问','了','老师','一个','问题']}
 ]};
 
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
@@ -655,7 +670,7 @@ const courseDropdown=document.getElementById('courseDropdown');
 const courseSelectedText=document.getElementById('courseSelectedText');
 courseTrigger.addEventListener('click',function(e){e.stopPropagation();courseTrigger.classList.toggle('open');courseDropdown.classList.toggle('show')});
 document.addEventListener('click',function(e){if(!courseDropdown.contains(e.target)&&!courseTrigger.contains(e.target)){courseTrigger.classList.remove('open');courseDropdown.classList.remove('show')}});
-function getLessonName(v){const map={lesson1:'第1课',lesson2:'第2课'};return map[v]||v;}
+function getLessonName(v){const map={lesson1:'第1课',lesson2:'第2课',lesson3:'第3课'};return map[v]||v;}
 function updateCourseTriggerText(){
   const checked=document.querySelectorAll('.course-check:checked');
   const names=Array.from(checked).map(cb=>getLessonName(cb.value));
@@ -666,8 +681,8 @@ function updateCourseTriggerText(){
   document.querySelectorAll('.dropdown-item').forEach(item=>{const cb=item.querySelector('.course-check');item.classList.toggle('checked',cb.checked)})
 }
 function getSelectedCourses(){return Array.from(document.querySelectorAll('.course-check:checked')).map(cb=>cb.value)}
-function getWordPool(){const cs=getSelectedCourses();let p=[];cs.forEach(c=>{if(c==='lesson1')p=p.concat(LESSON1);else if(c==='lesson2')p=p.concat(LESSON2);});return p;}
-function getSentencePool(){const cs=getSelectedCourses();let p=[];cs.forEach(c=>{if(c==='lesson1')p=p.concat(LESSON1_SENTENCES);else if(c==='lesson2')p=p.concat(LESSON2_SENTENCES);});return p;}
+function getWordPool(){const cs=getSelectedCourses();let p=[];cs.forEach(c=>{if(c==='lesson1')p=p.concat(LESSON1);else if(c==='lesson2')p=p.concat(LESSON2);else if(c==='lesson3')p=p.concat(LESSON3);});return p;}
+function getSentencePool(){const cs=getSelectedCourses();let p=[];cs.forEach(c=>{if(c==='lesson1')p=p.concat(LESSON1_SENTENCES);else if(c==='lesson2')p=p.concat(LESSON2_SENTENCES);else if(c==='lesson3')p=p.concat(LESSON3_SENTENCES);});return p;}
 function getQuizSentencePool(){const cs=getSelectedCourses();let p=[];cs.forEach(c=>{if(QUIZ_SENTENCES[c])p=p.concat(QUIZ_SENTENCES[c])});return p}
 
 // ==================== MQTT ====================
@@ -705,16 +720,51 @@ function getStudents(){try{return JSON.parse(localStorage.getItem('pinyin_studen
 function saveStudents(s){localStorage.setItem('pinyin_students',JSON.stringify(s))}
 
 // ==================== 导航切换 ====================
+let isDuelPlaying = false;
 const moduleBtns=document.querySelectorAll('.module-btn');
 const panels={word:document.getElementById('panel-word'),pair:document.getElementById('panel-pair'),cloud:document.getElementById('panel-cloud'),flip:document.getElementById('panel-flip'),fill:document.getElementById('panel-fill'),quiz:document.getElementById('panel-quiz')};
 const pageTitle=document.getElementById('pageTitle');
 const titles={word:'🧩 单字组词',pair:'🔗 词汇配对',cloud:'☁️ 词云',flip:'🃏 翻牌子',fill:'✍️ 选词填空',quiz:'🏆 争霸赛'};
-moduleBtns.forEach(b=>b.addEventListener('click',function(){moduleBtns.forEach(x=>x.classList.remove('active'));this.classList.add('active');const m=this.dataset.module;Object.keys(panels).forEach(k=>panels[k].classList.toggle('active',k===m));pageTitle.textContent=titles[m]||'练习';if(m==='quiz')initQuizAbsentList()}));
-document.querySelectorAll('.course-check').forEach(cb=>cb.addEventListener('change',()=>{const cs=getSelectedCourses();if(cs.length===0){alert('请至少勾选一课');cb.checked=true;updateCourseTriggerText();return}updateCourseTriggerText();wordUsedSet.clear();pairUsedSet.clear();flipUsedSet.clear();initWordGroup();initPairGroup();initFlipSet();initFillSet();if(pairMode==='duel')initDuel(true);syncEchoCbsFromSidebar()}));
+moduleBtns.forEach(b=>b.addEventListener('click',function(){
+  if(isDuelPlaying && this.dataset.module !== 'word' && this.dataset.module !== 'pair'){
+    alert('比赛正在进行中，请先切换回单人模式，再切换其他模块。');return;
+  }
+  moduleBtns.forEach(x=>x.classList.remove('active'));this.classList.add('active');
+  const m=this.dataset.module;
+  Object.keys(panels).forEach(k=>panels[k].classList.toggle('active',k===m));
+  pageTitle.textContent=titles[m]||'练习';
+  if(m==='quiz')initQuizAbsentList()
+}));
+document.querySelectorAll('.course-check').forEach(cb=>cb.addEventListener('change',()=>{const cs=getSelectedCourses();if(cs.length===0){alert('请至少勾选一课');cb.checked=true;updateCourseTriggerText();return}updateCourseTriggerText();wordUsedSet.clear();pairUsedSet.clear();flipUsedSet.clear();initWordGroup();initPairGroup();initFlipSet();initFillSet();if(pairMode==='duel')initDuel(true);if(wordMode==='duel')initWordDuel(true);syncEchoCbsFromSidebar()}));
 
 // ==================== 单字组词 ====================
 let wordUsedSet=new Set(),currentWordGroup=[],wordCompleted=[],charItems=[],selectedIndices=[];
+let wordMode='single';
+let wordDuelData={};
+
 const charGrid=document.getElementById('charGrid'),progressMsg=document.getElementById('progressMsg'),wordResult=document.getElementById('wordResult'),usedCount=document.getElementById('usedCount'),totalCountDisplay=document.getElementById('totalCountDisplay'),wordCompleteMsg=document.getElementById('wordCompleteMsg');
+const wordModeSelect=document.getElementById('wordModeSelect');
+const wordSingleMode=document.getElementById('wordSingleMode');
+const wordDuelMode=document.getElementById('wordDuelMode');
+const wordDuelMsg=document.getElementById('wordDuelMsg');
+
+wordModeSelect.addEventListener('change',function(){
+  wordMode=this.value;
+  if(wordMode==='single'){
+    isDuelPlaying = false;
+    wordSingleMode.style.display='block';
+    wordDuelMode.style.display='none';
+    stopWordDuelTimers();
+    initWordGroup();
+  }else{
+    isDuelPlaying = true;
+    wordSingleMode.style.display='none';
+    wordDuelMode.style.display='block';
+    initWordDuel(true);
+  }
+});
+
+// 单人逻辑
 function initWordGroup(){const p=getWordPool().filter(w=>w.word.length>=2);if(p.length===0){charGrid.innerHTML='<div style="color:#8a9aa8;padding:40px;">请先勾选课程</div>';return}currentWordGroup=pickWords(p,wordUsedSet,5);wordCompleted=[];selectedIndices=[];wordCompleteMsg.textContent='';usedCount.textContent=wordUsedSet.size;totalCountDisplay.textContent=p.length;buildCharItems();renderWordGroup()}
 function buildCharItems(){charItems=[];currentWordGroup.forEach(w=>w.word.split('').forEach(ch=>charItems.push({char:ch,word:w.word,used:false})));shuffle(charItems)}
 function renderWordGroup(){const av=charItems.filter(i=>!i.used);charGrid.innerHTML='';av.forEach((it,idx)=>{const b=document.createElement('button');b.className='char-btn';b.textContent=it.char;b.onclick=()=>onWordCharClick(idx);charGrid.appendChild(b)});progressMsg.textContent=av.length===0?'🎉 本组完成！':`剩余 ${currentWordGroup.length-wordCompleted.length} 个词`;wordResult.innerHTML='';wordCompleted.forEach(w=>{const c=document.createElement('div');c.className='word-card';c.innerHTML=`<div class="word">${w.word}</div><div class="pinyin">${w.pinyin}</div><div class="trans">${w.en} · ${w.ru}</div>`;wordResult.appendChild(c)});if(wordCompleted.length===0)wordResult.innerHTML='<span style="color:#8a9aa8;">点击汉字组词</span>';selectedIndices=[];updateWordHighlight()}
@@ -722,10 +772,201 @@ function onWordCharClick(i){const av=charItems.filter(x=>!x.used);if(i>=av.lengt
 function updateWordHighlight(){document.querySelectorAll('.char-btn').forEach(b=>b.classList.remove('selected'));selectedIndices.forEach(ri=>{const it=charItems[ri];if(!it||it.used)return;const bs=document.querySelectorAll('.char-btn');for(let b of bs){if(b.textContent===it.char&&!b.classList.contains('used')){b.classList.add('selected');break}}})}
 document.getElementById('newWordGroup').onclick=initWordGroup;initWordGroup();
 
+// 双人逻辑
+function stopWordDuelTimers(){
+  if(wordDuelData.sharedTimer){clearInterval(wordDuelData.sharedTimer);wordDuelData.sharedTimer=null;}
+  wordDuelData.startTime=null;
+}
+function formatTime(sec){const m=Math.floor(sec/60);const s=sec%60;return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');}
+function startWordDuelTimer(){
+  if(wordDuelData.startTime) return;
+  wordDuelData.startTime = Date.now();
+  wordDuelData.sharedTimer = setInterval(()=>{
+    const elapsed = Math.floor((Date.now() - wordDuelData.startTime)/1000);
+    if(wordDuelData.p1 && !wordDuelData.p1.finished) document.getElementById('wordDuelTimer1').textContent = formatTime(elapsed);
+    if(wordDuelData.p2 && !wordDuelData.p2.finished) document.getElementById('wordDuelTimer2').textContent = formatTime(elapsed);
+  }, 200);
+}
+
+function pickWordsForPlayer(pool, count=6) {
+  const validPool = pool.filter(w => w.word.length >= 2);
+  const shuffled = shuffle([...validPool]);
+  return shuffled.slice(0, count);
+}
+
+function initWordDuel(regenerate){
+  stopWordDuelTimers();
+  if(regenerate){
+    const p=getWordPool().filter(w=>w.word.length>=2);
+    if(p.length<12){alert('词库至少需要 12 个词才能开始双人对决');return;}
+    
+    const pool = shuffle([...p]);
+    const words1 = pickWordsForPlayer(pool, 6).map(w => ({...w, matched: false}));
+    
+    const usedWords = words1.map(w => w.word);
+    const pool2 = pool.filter(w => !usedWords.includes(w.word));
+    const finalPool2 = pool2.length >= 6 ? pool2 : pool;
+    const words2 = pickWordsForPlayer(finalPool2, 6).map(w => ({...w, matched: false}));
+
+    wordDuelData.p1 = buildWordDuelPlayerData(words1);
+    wordDuelData.p2 = buildWordDuelPlayerData(words2);
+  }
+  if(!wordDuelData.p1||!wordDuelData.p2)return;
+  
+  wordDuelData.startTime=null;
+  wordDuelData.sharedTimer=null;
+  
+  document.getElementById('wordDuelTimer1').textContent='00:00';
+  document.getElementById('wordDuelTimer2').textContent='00:00';
+  document.getElementById('wordDuelPlayer1').classList.remove('finished');
+  document.getElementById('wordDuelPlayer2').classList.remove('finished');
+  document.getElementById('wordDuelPlayer1').style.borderColor='';
+  document.getElementById('wordDuelPlayer2').style.borderColor='';
+  wordDuelMsg.textContent='';
+  wordDuelMsg.className='duel-result-msg';
+  
+  renderWordDuel(1);
+  renderWordDuel(2);
+}
+
+function buildWordDuelPlayerData(words) {
+  const chars = [];
+  words.forEach(w => {
+    w.word.split('').forEach(c => {
+      chars.push({ char: c, word: w.word });
+    });
+  });
+  return {
+    words: words,
+    chars: shuffle(chars),
+    selected: [],
+    matchedWordsCount: 0,
+    locked: false,
+    finished: false,
+    elapsed: 0
+  };
+}
+
+function renderWordDuel(pNum) {
+  const p = wordDuelData['p' + pNum];
+  
+  const cluesArea = document.getElementById('wordDuelClues' + pNum);
+  cluesArea.innerHTML = '';
+  p.words.forEach(w => {
+    const card = document.createElement('div');
+    card.className = 'clue-card';
+    if(w.matched){
+      card.innerHTML = `<div style="text-decoration:line-through;color:#94a3b8">${w.word}</div><div class="trans">✅ 完成</div>`;
+      card.style.opacity = '0.5';
+    } else {
+      card.innerHTML = `<div>${w.en}</div><div class="trans">${w.ru}</div>`;
+    }
+    cluesArea.appendChild(card);
+  });
+
+  const grid = document.getElementById('wordDuelGrid' + pNum);
+  grid.innerHTML = '';
+  p.chars.forEach((c, i) => {
+    const btn = document.createElement('div');
+    btn.className = 'duel-char-card';
+    if (p.selected.includes(i)) btn.classList.add('active');
+    
+    let isUsed = false;
+    p.words.forEach(w => {
+      if (w.matched && w.word.includes(c.char)) isUsed = true;
+    });
+    
+    if (isUsed) {
+      btn.classList.add('matched');
+    } else {
+      btn.textContent = c.char;
+      btn.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        onWordDuelCharClick(pNum, i);
+      });
+    }
+    grid.appendChild(btn);
+  });
+}
+
+function onWordDuelCharClick(pNum, idx) {
+  const p = wordDuelData['p' + pNum];
+  if (p.finished || p.locked) return;
+  if (p.selected.includes(idx)) return;
+
+  if (!wordDuelData.startTime) startWordDuelTimer();
+
+  p.selected.push(idx);
+  renderWordDuel(pNum);
+
+  const selectedChars = p.selected.map(i => p.chars[i].char).join('');
+  
+  const matchedWord = p.words.find(w => w.word === selectedChars && !w.matched);
+  
+  if (matchedWord) {
+    matchedWord.matched = true;
+    p.matchedWordsCount++;
+    p.selected = [];
+    renderWordDuel(pNum);
+
+    if (p.matchedWordsCount === p.words.length) {
+      p.finished = true;
+      p.elapsed = Math.floor((Date.now() - wordDuelData.startTime) / 1000);
+      document.getElementById('wordDuelPlayer' + pNum).style.borderColor = '#0b6e4f';
+      checkWordDuelWinner();
+    }
+  } else {
+    const validPrefix = p.words.some(w => !w.matched && w.word.startsWith(selectedChars));
+    
+    if (!validPrefix) {
+      p.locked = true;
+      const cards = document.querySelectorAll('#wordDuelGrid' + pNum + ' .duel-char-card');
+      p.selected.forEach(i => {
+        if (cards[i]) cards[i].classList.add('wrong');
+      });
+      
+      setTimeout(() => {
+        p.selected = [];
+        p.locked = false;
+        renderWordDuel(pNum);
+      }, 500);
+    }
+  }
+}
+
+function checkWordDuelWinner() {
+  const p1 = wordDuelData.p1, p2 = wordDuelData.p2;
+  
+  if (p1.finished && p2.finished) {
+    if (p1.elapsed < p2.elapsed) {
+      wordDuelMsg.className = 'duel-result-msg win1';
+      wordDuelMsg.textContent = `🏆 玩家 1 获胜！用时 ${formatTime(p1.elapsed)} vs ${formatTime(p2.elapsed)}`;
+    } else if (p2.elapsed < p1.elapsed) {
+      wordDuelMsg.className = 'duel-result-msg win2';
+      wordDuelMsg.textContent = `🏆 玩家 2 获胜！用时 ${formatTime(p2.elapsed)} vs ${formatTime(p1.elapsed)}`;
+    } else {
+      wordDuelMsg.className = 'duel-result-msg waiting';
+      wordDuelMsg.textContent = `🤝 平局！用时都是 ${formatTime(p1.elapsed)}`;
+    }
+    fireConfetti();
+    if(wordDuelData.sharedTimer) clearInterval(wordDuelData.sharedTimer);
+  } else if (p1.finished) {
+    wordDuelMsg.className = 'duel-result-msg waiting';
+    wordDuelMsg.textContent = `✅ 玩家 1 完成！用时 ${formatTime(p1.elapsed)} · 等待玩家 2…`;
+  } else if (p2.finished) {
+    wordDuelMsg.className = 'duel-result-msg waiting';
+    wordDuelMsg.textContent = `✅ 玩家 2 完成！用时 ${formatTime(p2.elapsed)} · 等待玩家 1…`;
+  }
+}
+
+document.getElementById('wordDuelNewBtn').onclick=()=>initWordDuel(true);
+
+
 // ==================== 词汇配对 ====================
 let pairUsedSet=new Set(),pairLeft=[],pairRight=[],pairMatchedCount=0,pairSelectedLeft=null;
 let pairMode='single';
 let duelData={};
+
 const leftCol=document.getElementById('leftCol'),rightCol=document.getElementById('rightCol'),pairStatus=document.getElementById('pairStatus'),pairUsedCount=document.getElementById('pairUsedCount'),pairTotalCount=document.getElementById('pairTotalCount'),pairBatchInfo=document.getElementById('pairBatchInfo'),pairCompleteMsg=document.getElementById('pairCompleteMsg');
 const pairModeSelect=document.getElementById('pairModeSelect');
 const pairSingleMode=document.getElementById('pairSingleMode');
@@ -735,18 +976,19 @@ const duelResult=document.getElementById('duelResult');
 pairModeSelect.addEventListener('change',function(){
   pairMode=this.value;
   if(pairMode==='single'){
+    isDuelPlaying = false;
     pairSingleMode.style.display='block';
     pairDuelMode.style.display='none';
     stopAllDuelTimers();
     initPairGroup();
   }else{
+    isDuelPlaying = true;
     pairSingleMode.style.display='none';
     pairDuelMode.style.display='block';
     initDuel(true);
   }
 });
 
-// 单人模式
 function initPairGroup(){const p=getWordPool();if(p.length===0)return;const g=pickWords(p,pairUsedSet,5);pairLeft=shuffle([...g.map(w=>({...w,matched:false}))]);pairRight=shuffle([...g.map(w=>({word:w.word,pinyin:w.pinyin,en:w.en,ru:w.ru,matched:false,display:`${w.pinyin} (${w.en})`}))]);pairMatchedCount=0;pairSelectedLeft=null;pairUsedCount.textContent=pairUsedSet.size;pairTotalCount.textContent=p.length;pairCompleteMsg.textContent='';renderPairGroup()}
 function renderPairGroup(){leftCol.innerHTML='';pairLeft.forEach((w,i)=>{const d=document.createElement('div');d.className='pair-item'+(w.matched?' matched':'');d.textContent=w.word;d.onclick=()=>onPairLeftClick(i);leftCol.appendChild(d)});rightCol.innerHTML='';pairRight.forEach((it,i)=>{const d=document.createElement('div');d.className='pair-item'+(it.matched?' matched':'');d.innerHTML=it.display;d.onclick=()=>onPairRightClick(i);rightCol.appendChild(d)});const t=pairLeft.length;pairStatus.textContent=`配对进度 ${pairMatchedCount}/${t}`;if(pairMatchedCount===t){pairStatus.textContent='✅ 完成！';pairCompleteMsg.textContent='🎉 本组配对完成！'}pairBatchInfo.textContent=`点击左边词，再点击右边对应项配对（${pairMatchedCount}/${t}）`;document.querySelectorAll('.pair-item').forEach(e=>e.classList.remove('active'));if(pairSelectedLeft!==null&&!pairLeft[pairSelectedLeft].matched){const le=leftCol.querySelectorAll('.pair-item');if(le[pairSelectedLeft])le[pairSelectedLeft].classList.add('active')}}
 function onPairLeftClick(i){if(pairLeft[i].matched||pairMatchedCount===pairLeft.length)return;pairSelectedLeft=i;renderPairGroup()}
@@ -754,25 +996,23 @@ function onPairRightClick(i){if(pairRight[i].matched||pairMatchedCount===pairLef
 document.getElementById('newPairGroup').onclick=()=>{if(pairMode==='single')initPairGroup();else initDuel(true)};
 initPairGroup();
 
-// ==================== 双人对决（6词 2列） ====================
 function stopAllDuelTimers(){
   if(duelData.sharedTimer){clearInterval(duelData.sharedTimer);duelData.sharedTimer=null;}
   duelData.startTime=null;
 }
-function formatTime(sec){const m=Math.floor(sec/60);const s=sec%60;return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');}
 function startSharedTimer(){
   if(duelData.startTime) return;
   duelData.startTime = Date.now();
   duelData.sharedTimer = setInterval(()=>{
     const elapsed = Math.floor((Date.now() - duelData.startTime)/1000);
-    if(duelData.p1 && duelData.p1.started && !duelData.p1.finished){duelData.p1.elapsed = elapsed;document.getElementById('duelTimer1').textContent = formatTime(elapsed);}
-    if(duelData.p2 && duelData.p2.started && !duelData.p2.finished){duelData.p2.elapsed = elapsed;document.getElementById('duelTimer2').textContent = formatTime(elapsed);}
+    if(duelData.p1 && !duelData.p1.finished){duelData.p1.elapsed = elapsed;document.getElementById('duelTimer1').textContent = formatTime(elapsed);}
+    if(duelData.p2 && !duelData.p2.finished){duelData.p2.elapsed = elapsed;document.getElementById('duelTimer2').textContent = formatTime(elapsed);}
   }, 100);
 }
 function initDuel(regenerate){
   stopAllDuelTimers();
   if(regenerate){
-    const p=getWordPool();
+    const p=getWordPool().filter(w=>w.word.length>=2);
     if(p.length<12){alert('词库至少需要 12 个词才能开始双人对决');return;}
     const shuffled=shuffle([...p]);
     duelData.words1=shuffled.slice(0,6);
@@ -787,8 +1027,8 @@ function initDuel(regenerate){
     });
     return shuffle(cards).map(c=>({...c,matched:false}));
   }
-  duelData.p1={cards:buildCards(duelData.words1),selected:[],matched:0,started:false,finished:false,elapsed:0,locked:false};
-  duelData.p2={cards:buildCards(duelData.words2),selected:[],matched:0,started:false,finished:false,elapsed:0,locked:false};
+  duelData.p1={cards:buildCards(duelData.words1),selected:[],matched:0,finished:false,elapsed:0,locked:false};
+  duelData.p2={cards:buildCards(duelData.words2),selected:[],matched:0,finished:false,elapsed:0,locked:false};
   duelData.startTime=null;
   duelData.sharedTimer=null;
   
@@ -809,13 +1049,13 @@ function renderDuel(playerNum){
   board.innerHTML='';
   d.cards.forEach((c,i)=>{
     const btn=document.createElement('div');
-    btn.className='duel-card'+(c.matched?' matched':'')+(d.selected.includes(i)?' active':'');
+    btn.className='duel-word-card'+(c.matched?' matched':'')+(d.selected.includes(i)?' active':'');
     btn.textContent=c.text;
     btn.addEventListener('pointerdown',(e)=>{e.preventDefault();onDuelCardClick(playerNum,i);});
-    btn.addEventListener('contextmenu',(e)=>e.preventDefault());
     board.appendChild(btn);
   });
-  const totalWords=duelData.words1?duelData.words1.length:6;
+  
+  const totalWords = playerNum===1 ? duelData.words1.length : duelData.words2.length;
   const pct=d.matched/totalWords*100;
   document.getElementById('duelProgress'+playerNum).style.width=pct+'%';
   document.getElementById('duelProgressText'+playerNum).textContent=d.matched+' / '+totalWords;
@@ -826,7 +1066,7 @@ function onDuelCardClick(playerNum,idx){
   const c=d.cards[idx];
   if(c.matched)return;
   
-  if(!d.started){d.started=true;startSharedTimer();}
+  if(!duelData.startTime) startSharedTimer();
   
   if(d.selected.includes(idx)){d.selected=d.selected.filter(x=>x!==idx);renderDuel(playerNum);return;}
   
@@ -839,14 +1079,16 @@ function onDuelCardClick(playerNum,idx){
     if(ca.id===cb.id && ca.type!==cb.type){
       ca.matched=true;cb.matched=true;d.matched++;d.selected=[];d.locked=false;
       renderDuel(playerNum);
-      if(d.matched===duelData.words1.length){
+      
+      const totalWords = playerNum===1 ? duelData.words1.length : duelData.words2.length;
+      if(d.matched===totalWords){
         d.finished=true;
         d.elapsed = Math.floor((Date.now()-duelData.startTime)/1000);
         document.getElementById('duelPlayer'+playerNum).classList.add('finished');
         checkDuelWinner();
       }
     }else{
-      const cards=document.querySelectorAll('#duelBoard'+playerNum+' .duel-card');
+      const cards=document.querySelectorAll('#duelBoard'+playerNum+' .duel-word-card');
       if(cards[a])cards[a].classList.add('wrong');
       if(cards[b])cards[b].classList.add('wrong');
       const selBackup=[...d.selected];
@@ -891,30 +1133,15 @@ document.getElementById('clearCloudBtn').onclick=function(){if(cloudItems.length
 function generateQR(){const c=document.getElementById('qrCode');c.innerHTML='';const u=window.location.href.replace(/[^/]*$/,'')+'student.html';try{new QRCode(c,{text:u,width:150,height:150,colorDark:'#1a2a3a',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.H})}catch(e){c.innerHTML='QR码生成失败'}}
 generateQR();
 
-// ==================== 翻牌子（均匀轮换） ====================
-let flipWords=[],flipStates=[];
-let flipUsedSet=new Set(); // 记录已经出现过的词
+// ==================== 翻牌子 ====================
+let flipWords=[],flipStates=[],flipUsedSet=new Set();
 function initFlipSet(){
   const p=getWordPool();
   if(p.length===0)return;
-  
-  // 找出还没出现过的词
   let av = p.filter(w => !flipUsedSet.has(w.word));
-  
-  // 如果剩余没抽过的词不够6个，就重置池子
-  if (av.length < 6) {
-    flipUsedSet.clear();
-    av = p;
-  }
-  
-  // 从可用词中随机打乱
-  const shuffledAv = shuffle([...av]);
-  // 取前6个
-  const selected = shuffledAv.slice(0, Math.min(6, shuffledAv.length));
-  
-  // 将抽中的词加入已用集合
+  if (av.length < 6) { flipUsedSet.clear(); av = p; }
+  const selected = shuffle([...av]).slice(0, Math.min(6, av.length));
   selected.forEach(w => flipUsedSet.add(w.word));
-  
   flipWords = selected;
   flipStates = new Array(flipWords.length).fill(0);
   renderFlipCards();
